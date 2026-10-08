@@ -293,7 +293,7 @@
         <option value="https://www.cloudflare.com/cdn-cgi/trace">Cloudflare</option>
         <option value="https://www.apple.com/library/test/success.html">Apple</option>
       </select>
-      <div id="startBtn" class="disabled finding" onclick="startStop()" aria-disabled="true" title="Finding best server..." data-label-start="Start" data-label-finding="Finding..." data-label-abort="Abort" data-i18n-attr="title:stability.finding,data-label-start:classic.start,data-label-finding:stability.finding,data-label-abort:classic.abort"></div>
+      <div id="startBtn" class="disabled finding" onclick="startStop()" aria-disabled="true" title="Finding best server..." data-label-start="Start" data-label-finding="Finding..." data-label-abort="Abort" data-i18n-attr="data-label-start:classic.start,data-label-finding:stability.finding,data-label-abort:classic.abort"></div>
       <div id="resetBtn" onclick="resetTest()" data-i18n="stability.reset">Reset</div>
     </div>
 
@@ -362,7 +362,7 @@
           value="0"
           oninput="updateThreshold(this.value)"
         />
-        <span id="thresholdValue" data-i18n="stability.off">Off</span>
+        <span id="thresholdValue">Off</span>
       </label>
       <button id="downloadCsvBtn" onclick="downloadCsv()" data-i18n="stability.download-csv">Download CSV</button>
     </div>
@@ -981,10 +981,15 @@
         URL.revokeObjectURL(url);
       }
 
-      // Init — load server list first (async), then initialize UI
-      loadServers(function () {
-        initServers();
-        drawChart();
+      // Deferred localization runs before DOMContentLoaded and has a bounded wait.
+      window.addEventListener("DOMContentLoaded", function () {
+        window.LibreSpeedI18n.ready.then(function () {
+          updateThreshold(I("alertThreshold").value);
+          loadServers(function () {
+            initServers();
+            drawChart();
+          });
+        });
       });
     </script>
   <script defer src="frontend/javascript/i18n.js"></script>

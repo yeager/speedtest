@@ -359,7 +359,26 @@ function startRenderingLoop() {
       selectedServer.textContent = server.name;
       if (server.sponsorName) {
         if (server.sponsorURL) {
-          sponsor.innerHTML = `${window.LibreSpeedI18n.t("server.sponsor", "Sponsor: {name}", { name: "" })}<a href="${server.sponsorURL}">${server.sponsorName}</a>`;
+          let sponsorURL;
+          try {
+            sponsorURL = new URL(server.sponsorURL, window.location.href);
+          } catch (error) {
+            // Display the sponsor as plain text if its URL is invalid.
+          }
+          if (sponsorURL && ["http:", "https:"].includes(sponsorURL.protocol)) {
+            const label = window.LibreSpeedI18n.t("server.sponsor", "Sponsor: {name}");
+            const placeholder = label.indexOf("{name}");
+            const link = document.createElement("a");
+            link.href = sponsorURL.href;
+            link.textContent = server.sponsorName;
+            sponsor.replaceChildren(
+              document.createTextNode(placeholder < 0 ? `${label} ` : label.slice(0, placeholder)),
+              link,
+              document.createTextNode(placeholder < 0 ? "" : label.slice(placeholder + 6))
+            );
+          } else {
+            sponsor.textContent = window.LibreSpeedI18n.t("server.sponsor", "Sponsor: {name}", { name: server.sponsorName });
+          }
         } else {
           sponsor.textContent = window.LibreSpeedI18n.t("server.sponsor", "Sponsor: {name}", { name: server.sponsorName });
         }
